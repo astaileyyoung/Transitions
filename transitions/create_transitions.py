@@ -36,15 +36,15 @@ def dissolve(sequence, other, gamma=0):
     duration = len(sequence)
     step = 1 / duration
     alphas = [1 - (step * x) for x in range(0, duration)]
-    sequence = []
+    s = []
     for x in range(duration):
         a = sequence[x]
         b = other[x]
         alpha = alphas[x]
         beta = 1 - alpha
         dissolved = cv2.addWeighted(a, alpha, b, beta, gamma)
-        sequence.append(dissolved)
-    dissolve = Dissolve(sequence)
+        s.append(dissolved)
+    dissolve = Dissolve(s)
     return dissolve
 
 
@@ -62,7 +62,7 @@ def fade(sequence, gamma=0, fade_in=False):
     mask = np.zeros(sequence[0].shape, dtype='uint8')
     step = 1/duration
     alphas = [x * step for x in range(1, duration + 1)]
-    sequence = []
+    s = []
     for x in range(duration):
         img = sequence[x]
         if fade_in:
@@ -72,8 +72,8 @@ def fade(sequence, gamma=0, fade_in=False):
             alpha = alphas[-x]
             beta = alphas[x]
         combined = cv2.addWeighted(img, alpha, mask.copy(), beta, gamma)
-        sequence.append(combined)
-    fade = Fade(sequence)
+        s.append(combined)
+    fade = Fade(s)
     return fade
 
 
@@ -90,7 +90,7 @@ def hwipe(sequence, other, reverse=False):
     step = w/duration
     slices_a = [sequence[x][:, int(step * (x + 1)):, :] for x in range(0, duration)]
     slices_b = [other[x][:, w - int(step * (x + 1)):, :] for x in range(0, duration)]
-    sequence = []
+    s = []
     for x in range(duration):
         if reverse:
             ac = slices_b[x]
@@ -99,8 +99,8 @@ def hwipe(sequence, other, reverse=False):
             ac = slices_a[x]
             bc = slices_b[x]
         c = np.concatenate([bc, ac], axis=1)
-        sequence.append(c)
-    wipe = Wipe([sequence[0]] + sequence[1:], type='horizontal')
+        s.append(c)
+    wipe = Wipe([sequence[0]] + s[1:], type='horizontal')
     return wipe
 
 
@@ -110,7 +110,7 @@ def vwipe(sequence, other, reverse=False):
     step = h/duration
     slices_a = [sequence[x][int(step * (x + 1)):, :, :] for x in range(0, duration)]
     slices_b = [other[x][h - int(step * (x + 1)):, :, :] for x in range(0, duration)]
-    sequence = []
+    s = []
     for x in range(duration):
         if reverse:
             ac = slices_b[x]
@@ -119,8 +119,8 @@ def vwipe(sequence, other, reverse=False):
             ac = slices_a[x]
             bc = slices_b[x]
         c = np.concatenate([bc, ac], axis=0)
-        sequence.append(c)
-    wipe = Wipe(sequence, type='vertical')
+        s.append(c)
+    wipe = Wipe(s, type='vertical')
     return wipe
 
 
@@ -144,7 +144,7 @@ def iris(sequence, iris_in=False):
 
     step = 1/duration
     radii = [(step * x) for x in range(duration + 1)]
-    sequence = []
+    s = []
     for x in range(duration):
         if iris_in:
             radius = int((s * radii[x])/2)
@@ -156,6 +156,6 @@ def iris(sequence, iris_in=False):
         img = sequence[x]
         c = cv2.bitwise_and(img, mask)
         c = cv2.GaussianBlur(c, (5, 5), 0)
-        sequence.append(c)
-    iris = Iris(sequence)
+        s.append(c)
+    iris = Iris(s)
     return iris
